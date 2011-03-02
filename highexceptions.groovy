@@ -25,11 +25,11 @@ println "\nStarting .. \n\nWill try to find statistics from the file: " + logpat
 String catStatement = 'cat ' + logpath
 
 def allExceptionsProc = catStatement.execute() | 'grep -c Exception'.execute()
-println "\nCount of exceptions in file: " + allExceptionsProc.text
+println "\nCount of lines with \"Exception\" in file: " + allExceptionsProc.text
 
 // Count unique exceptions
 def uniqueExceptionCountProc = catStatement.execute() | 'grep Exception '.execute() |  'sort'.execute() |  'uniq'.execute() | 'wc -l'.execute()
-println "Count of unique exceptions in file: " + uniqueExceptionCountProc.text
+println "Count of unique lines with \"Exception\" in file: " + uniqueExceptionCountProc.text
 
 // Let's do the hard work unique exceptions
 def uniqueExceptionProc = catStatement.execute() | 'grep -n Exception'.execute() |  'sort'.execute() |  'uniq'.execute()  
@@ -39,7 +39,7 @@ println "Processing all exceptions"
 def map = [:]
 uniqueExceptionProc.text.eachLine{line,index ->
 	def linenumber = line.trim().split(":")[0]
-	def linevalue = line.substring(6)
+	def linevalue = line.minus(linenumber + ":")
 	if(line!= null && linenumber != null){
 		if(map.containsKey(linevalue)){
 			map.put(linevalue, map.get(linevalue) << "," +linenumber)
