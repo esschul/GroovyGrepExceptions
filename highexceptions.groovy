@@ -6,7 +6,6 @@
 
 if (this.args.size() !=1 )  {
   println "This script expects 1 path"
-  // You can even print the usage here.
   return
 }
 
@@ -19,15 +18,14 @@ String logpath = args[0]
 
 println "\nFind the exceptions with the highest frequency in the log\nRinse and repeat over time to start seeing patterns."
 println "\nStarting .. \n\nWill try to find statistics from the file: " + logpath
-// Todo: create csv-file
 
-// Count all exceptions
+// Count all mentions of exceptions
 String catStatement = 'cat ' + logpath
 
 def allExceptionsProc = catStatement.execute() | 'grep -c Exception'.execute()
 println "\nCount of lines with \"Exception\" in file: " + allExceptionsProc.text
 
-// Count unique exceptions
+// Count unique lines of exceptions
 def uniqueExceptionCountProc = catStatement.execute() | 'grep Exception '.execute() |  'sort'.execute() |  'uniq'.execute() | 'wc -l'.execute()
 println "Count of unique lines with \"Exception\" in file: " + uniqueExceptionCountProc.text
 
@@ -47,16 +45,20 @@ uniqueExceptionProc.text.eachLine{line,index ->
 			map.put(linevalue,linenumber)			
 		}
 	}
-
 }
+
 map = map.sort { a, b -> b.value.length() <=> a.value.length()}
+
 def date = new Date().format("dd-MM-yyyy")
 println "Writing the values to file: results-${date}.csv"
+
 def result = "Rank;Count;Error;Can be found at line"
 map.eachWithIndex{ key, value, index ->
 	def count = value.toString().split(',').size()
     index = index + 1
 	result += "\n$index;$count;$key;\"$value\"" 
 }
+
 def file = new File("results-${date}.csv").write(result)
+
 println "Done"
